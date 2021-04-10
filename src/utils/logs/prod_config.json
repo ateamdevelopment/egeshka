@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "disable_existing_loggers": true,
+  "formatters": {
+    "gunicorn_access_formatter": {
+      "class": "src.utils.logs.formatters.ExceptFormatter",
+      "datefmt": "[%d.%m-%H:%M:%S]",
+      "format": "web info: %(message)s"
+    },
+    "root_formatter": {
+      "class": "src.utils.logs.formatters.ExceptFormatter",
+      "datefmt": "[%d.%m-%H:%M:%S]",
+      "format": "%(levelname)-5s| %(name)s %(asctime)s <%(module)s->%(funcName)s(%(lineno)d)>: %(message)s"
+    }
+  },
+  "handlers": {
+    "gunicorn_access_file_handler": {
+      "level": "DEBUG",
+      "class": "logging.handlers.WatchedFileHandler",
+      "formatter": "gunicorn_access_formatter",
+      "filename": "src/utils/logs/logs.log",
+      "mode": "a",
+      "encoding": "utf-8"
+    },
+    "root_console_handler": {
+      "level": "DEBUG",
+      "class": "src.utils.logs.handlers.StdHandler",
+      "formatter": "root_formatter"
+    },
+    "root_file_handler": {
+      "level": "DEBUG",
+      "class": "logging.handlers.WatchedFileHandler",
+      "formatter": "root_formatter",
+      "filename": "src/utils/logs/logs.log",
+      "mode": "a",
+      "encoding": "utf-8"
+    }
+  },
+  "loggers": {
+    "gunicorn.access": {
+      "handlers": ["gunicorn_access_file_handler"],
+      "level": "INFO",
+      "propagate": false
+    },
+    "root": {
+      "handlers": ["root_console_handler", "root_file_handler"],
+      "level": "INFO"
+    }
+  }
+}

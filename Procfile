@@ -1,0 +1,1 @@
+web: gunicorn src.main:app -w 1 --threads 12

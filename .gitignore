@@ -1,0 +1,8 @@
+src/utils/logs/*.log
+.mypy_cache
+.pytest_cache
+
+.idea/
+files_t/
+__pycache__/
+vanv/
