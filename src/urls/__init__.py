@@ -2,9 +2,9 @@ from flask import Flask
 
 from src.urls._echo import Echo
 # noinspection PyProtectedMember
-from src.urls._auth import LogInUrl, CheckEmailUrl, RegisterUrl
+from src.urls.auth import LogInUrl, CheckEmailUrl, RegisterUrl
 # noinspection PyProtectedMember
-from src.urls._user_urls import UserUrl, AvatarUrl
+from src.urls.user_urls import UserUrl, AvatarUrl
 
 __all__ = ['init_urls']
 

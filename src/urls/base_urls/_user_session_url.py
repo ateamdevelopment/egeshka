@@ -62,8 +62,8 @@ class UserSessionUrl(IpSessionUrl, ABC):
         try:
             return cls.__user_sessions[token]
         except KeyError as key_error:
-            debug(f'{cls.__user_sessions}')
-            warning(f'No session for this token ({token})')
+            debug(f'{cls.__user_sessions = }')
+            warning(f'No user session for this token ({token})')
             raise key_error
 
     @classmethod

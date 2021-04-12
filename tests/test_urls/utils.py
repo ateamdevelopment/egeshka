@@ -50,6 +50,20 @@ class JsonResponse(SuccessfulResponse):
         return self.json == json.loads(response_data)
 
 
+class TokenResponse(JsonResponse):
+    def __init__(self, data, **token_name__length: int):
+        JsonResponse.__init__(self, data)
+        self.token_name__length: Final[dict[str, int]] = token_name__length
+
+    def _eq_data(self, response_data):
+        if super()._eq_data(response_data):
+            return all(
+                len(token) == self.token_name__length[token]
+                if (token := self.json.get(token_name)) else False
+                for token_name in self.token_name__length
+            )
+
+
 class ErrorResponse(JsonResponse):
     def __init__(self, error_code: int):
         JsonResponse.__init__(self, {'error': error_code})

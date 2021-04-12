@@ -5,7 +5,7 @@ from typing import Final, final
 from peewee import DoesNotExist
 
 from src.models import User
-from src.urls._auth._check_email_url import CheckEmailUrl
+from src.urls.auth._check_email_url import CheckEmailUrl
 from src.urls.base_urls import IpSessionUrl
 from src.urls.exceptions import HTTPException
 from src.utils import email as util_email

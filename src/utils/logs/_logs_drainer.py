@@ -12,16 +12,16 @@ __all__ = ['LogsDrainer']
 
 
 class LogsDrainer:
-    _DEFAULT_DELAY: Final[int] = 60  # seconds
-    _DEFAULT_MAX_LINE_COUNT: Final[int] = 1000
-    _DEFAULT_DIRECTORY_TO_UPLOAD: Final[str] = '/logs'
+    DEFAULT_DELAY: Final[int] = 60  # seconds
+    DEFAULT_MAX_LINE_COUNT: Final[int] = 1000
+    DEFAULT_DIRECTORY_TO_UPLOAD: Final[str] = '/logs'
 
     def __init__(
             self,
             path_to_logs: str,
-            delay: int = _DEFAULT_DELAY,
-            max_line_count: int = _DEFAULT_MAX_LINE_COUNT,
-            directory_to_upload: str = _DEFAULT_DIRECTORY_TO_UPLOAD
+            delay: int = DEFAULT_DELAY,
+            max_line_count: int = DEFAULT_MAX_LINE_COUNT,
+            directory_to_upload: str = DEFAULT_DIRECTORY_TO_UPLOAD
     ):
         """
         :param path_to_logs: absolute path (from /src) to the logs file

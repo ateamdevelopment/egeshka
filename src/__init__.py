@@ -4,7 +4,7 @@ Heroku requirements:
     heroku labs:enable runtime-dyno-metadata
 
 Environment requirements:
-    ON_HOSTING: Literal[0, 1] - 1, if the program runs on the hosting, else 0
+    _ON_HOSTING: Literal[0, 1] - 1, if the program runs on the hosting, else 0
     DATABASE_URL: <str>
     EMAIL_LOGIN: <str> - login of the main email account
     EMAIL_PASSWORD: <str> - password of the main email account
@@ -17,11 +17,11 @@ from typing import Final
 
 # noinspection SpellCheckingInspection
 __all__ = [
-    'ON_HOSTING', 'DATABASE_URL', 'EMAIL_LOGIN', 'EMAIL_PASSWORD',
+    '_ON_HOSTING', 'DATABASE_URL', 'EMAIL_LOGIN', 'EMAIL_PASSWORD',
     'CLOUDNARY_NAME', 'CLOUDNARY_KEY', 'CLOUDNARY_SECRET', 'YANDEX_DISK_TOKEN'
 ]
 
-ON_HOSTING: Final[bool] = bool(int(os.environ['ON_HOSTING']))
+_ON_HOSTING: Final[bool] = bool(int(os.environ['ON_HOSTING']))
 DATABASE_URL: Final[str] = os.environ['DATABASE_URL']
 EMAIL_LOGIN: Final[str] = os.environ['EMAIL_LOGIN']
 EMAIL_PASSWORD: Final[str] = os.environ['EMAIL_PASSWORD']

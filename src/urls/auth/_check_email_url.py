@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from http import HTTPStatus
-from logging import warning
+from logging import warning, debug
 from typing import Final, final
 
 from src.models import User
@@ -51,11 +51,23 @@ class CheckEmailUrl(IpSessionUrl):
     def __delete_session(cls, email: str) -> None:
         try:
             session = cls.__cache_email_sessions[email]
+        except KeyError:
+            warning(
+                f'No session for such key ({email = })'
+                f'in sessions ({cls.__cache_email_sessions = })'
+            )
+            return
+        try:
             del cls.__email_sessions[session.token]
             del cls.__cache_email_sessions[email]
             del cls.__cache_code_sessions[session.code]
         except KeyError:
-            pass
+            warning(
+                f'Cache error:\n'
+                f'{session.token = } -> {cls.__email_sessions = }\n'
+                f'{email = } -> {cls.__cache_email_sessions = }\n'
+                f'{session.code = } -> {cls.__cache_code_sessions = }'
+            )
 
     @classmethod
     def __generate_token(cls) -> str:
@@ -65,14 +77,21 @@ class CheckEmailUrl(IpSessionUrl):
     def __get_session(cls, token: str) -> __EmailSession:
         try:
             return cls.__email_sessions[token]
-        except KeyError:
-            warning(f'Not email token ({token})')
-            raise HTTPException(HTTPStatus.UNAUTHORIZED, f'Not valid {cls.NAME_TOKEN}')
+        except KeyError as key_error:
+            warning(
+                f'No email session for this token ({token})'
+                f'in sessions ({cls.__email_sessions = })'
+            )
+            raise key_error
 
     def post(self, request_json):
         token = self.get_value(request_json, self.NAME_TOKEN)
         code = self.get_value(request_json, 'code', int)
-        if code == (session := self.__get_session(token)).code:
+        try:
+            session = self.__get_session(token)
+        except KeyError:
+            return {'error': 100}
+        if code == session.code:
             user = User.create(session.email, session.password)
             self.__delete_session(session.email)
             user_token = UserSessionUrl.add_user_session(user)

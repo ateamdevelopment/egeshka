@@ -31,10 +31,6 @@ class AvatarUrl(UserSessionUrl):
                 HTTPStatus.BAD_REQUEST,
                 'invalid `avatar_data`'
             )
-        ################################## FIXME: for tests
-        with open('image.jpg', 'wb') as f:
-            f.write(avatar_data)
-        ################################## FIXME: for tests
         user = session.user
         if old_avatar_url := user.avatar_url:
             image_base.delete(old_avatar_url)

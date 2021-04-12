@@ -38,12 +38,17 @@
   },
   "loggers": {
     "gunicorn.access": {
-      "handlers": ["gunicorn_access_file_handler"],
+      "handlers": [
+        "gunicorn_access_file_handler"
+      ],
       "level": "INFO",
       "propagate": false
     },
     "root": {
-      "handlers": ["root_console_handler", "root_file_handler"],
+      "handlers": [
+        "root_console_handler",
+        "root_file_handler"
+      ],
       "level": "INFO"
     }
   }
