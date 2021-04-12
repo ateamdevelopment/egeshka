@@ -35,8 +35,11 @@ class SuccessfulResponse(TestResponse):
 
 
 class JsonResponse(SuccessfulResponse):
-    def __init__(self, data: Optional[Union[bytes, TypeJson]]):
-        if isinstance(data, bytes):
+    def __init__(self, data: Optional[Union[bytes, TypeJson]] = None):
+        if data is None:
+            SuccessfulResponse.__init__(self, None)
+            json_data = {}
+        elif isinstance(data, bytes):
             SuccessfulResponse.__init__(self, data)
             json_data = json.loads(data)
         else:
@@ -51,17 +54,20 @@ class JsonResponse(SuccessfulResponse):
 
 
 class TokenResponse(JsonResponse):
-    def __init__(self, data, **token_name__length: int):
+    def __init__(self, data=None, **token_name__length: int):
         JsonResponse.__init__(self, data)
         self.token_name__length: Final[dict[str, int]] = token_name__length
 
     def _eq_data(self, response_data):
         if super()._eq_data(response_data):
-            return all(
+            response_json = json.loads(response_data)
+            f = all(
                 len(token) == self.token_name__length[token]
-                if (token := self.json.get(token_name)) else False
+                if (token := response_json.get(token_name)) else False
                 for token_name in self.token_name__length
             )
+            print(f)
+            return f
 
 
 class ErrorResponse(JsonResponse):
