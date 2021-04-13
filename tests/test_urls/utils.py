@@ -61,13 +61,12 @@ class TokenResponse(JsonResponse):
     def _eq_data(self, response_data):
         if super()._eq_data(response_data):
             response_json = json.loads(response_data)
-            f = all(
-                len(token) == self.token_name__length[token]
-                if (token := response_json.get(token_name)) else False
+            return all(
+                len(token) == self.token_name__length[token_name]
+                if ((token := response_json.get(token_name)) is not None)
+                else False
                 for token_name in self.token_name__length
             )
-            print(f)
-            return f
 
 
 class ErrorResponse(JsonResponse):
