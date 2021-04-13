@@ -9,7 +9,7 @@ from typing import Final, Optional
 from flask import Request
 
 from src.urls.base_urls._base_url import BaseUrl
-from src.urls.exceptions import HTTPException
+from src.urls.exceptions import HTTP_Exception
 
 __all__ = ['IpSessionUrl']
 
@@ -72,7 +72,7 @@ class IpSessionUrl(BaseUrl, ABC):
         request = super()._get_request()
         if (ip := _get_ip(request)) is None:
             warning(f'No IP in request (\n\t{request.environ = }\n)')
-            raise HTTPException(HTTPStatus.UNAUTHORIZED, 'No IP')
+            raise HTTP_Exception(HTTPStatus.UNAUTHORIZED, 'No IP')
 
         if (global_session := IpSessionUrl.__global_ip_sessions.get(ip)) is None:
             global_session = IpSessionUrl.__GlobalSession(ip)
@@ -91,4 +91,4 @@ class IpSessionUrl(BaseUrl, ABC):
         session.mark()
         if session.is_ban():
             warning(f'IP {session.ip} was banned')
-            raise HTTPException(HTTPStatus.FORBIDDEN, 'Exceeded the number of requests')
+            raise HTTP_Exception(HTTPStatus.FORBIDDEN, 'Exceeded the number of requests')

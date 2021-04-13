@@ -12,9 +12,26 @@ class _ModelEnumMeta(type(BaseModel), type):
         pass
 
 
+_EnumDeleteException = AttributeError("Enum elements cannot be deleted")
+
+
 class BaseModelEnum(BaseModel, metaclass=_ModelEnumMeta):
+    @classmethod
+    def delete(cls):
+        """
+        :raises AttributeError: if call
+        """
+        raise _EnumDeleteException
+
+    @classmethod
+    def delete_by_id(cls, pk):
+        """
+        :raises AttributeError: if call
+        """
+        raise _EnumDeleteException
+
     def delete_instance(self, recursive=False, delete_nullable=False):
         """
         :raises AttributeError: if call
         """
-        raise AttributeError("Enum elements cannot be deleted")
+        raise _EnumDeleteException

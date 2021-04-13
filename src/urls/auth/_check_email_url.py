@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from http import HTTPStatus
-from logging import warning, debug
+from logging import warning
 from typing import Final, final
 
 from src.models import User
+from src.urls.exceptions import Error
 from src.urls.base_urls import IpSessionUrl, UserSessionUrl
-from src.urls.exceptions import HTTPException
 from src.utils.functions import generate_random_token
 
 __all__ = ['CheckEmailUrl']
@@ -25,6 +24,8 @@ class CheckEmailUrl(IpSessionUrl):
 
     LENGTH_TOKEN: Final[int] = 30
     NAME_TOKEN: Final[str] = 'email_token'
+
+    MismatchedCodeError: Final[Error] = Error(1)
 
     __email_sessions: Final[dict[str, __EmailSession]] = {}
     __cache_email_sessions: Final[dict[str, __EmailSession]] = {}
@@ -90,14 +91,10 @@ class CheckEmailUrl(IpSessionUrl):
         try:
             session = self.__get_session(token)
         except KeyError:
-            return {'error': 100}
+            raise Error.NO_SESSION
         if code == session.code:
             user = User.create(session.email, session.password)
             self.__delete_session(session.email)
             user_token = UserSessionUrl.add_user_session(user)
-            return {
-                'user_token': user_token
-            }
-        return {
-            'error': 1
-        }
+            return {'user_token': user_token}
+        raise self.MismatchedCodeError

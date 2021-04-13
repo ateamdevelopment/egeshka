@@ -1,14 +1,14 @@
 from http import HTTPStatus
 from typing import Union, Final
 
-__all__ = ['HTTPException']
+__all__ = ['HTTP_Exception']
 
 _HTTP_CODE_STATUS: dict[int, HTTPStatus] = {
     http_status.value: http_status for http_status in HTTPStatus
 }
 
 
-class HTTPException(Exception):
+class HTTP_Exception(Exception):
     def __init__(
             self,
             http_status: Union[int, HTTPStatus] = HTTPStatus.INTERNAL_SERVER_ERROR,

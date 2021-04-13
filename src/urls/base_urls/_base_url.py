@@ -6,7 +6,9 @@ from typing import Final, Type, TypeVar
 
 from flask import Flask, Request, Response, request as flask_request
 
-from src.urls.exceptions import HTTPException, InvalidTypeException, NoParameterException
+from src.urls.exceptions import (
+    Error, HTTP_Exception, InvalidTypeException, NoParameterException
+)
 from src.utils.types import TypeJson
 
 __all__ = ['BaseUrl']
@@ -51,16 +53,19 @@ class BaseUrl(ABC):
                 response_json = self.delete(request_json)
             else:
                 warning(f'{self.__class__.__name__}: method {method} not allowed')
-                raise HTTPException(HTTPStatus.METHOD_NOT_ALLOWED)
+                raise HTTP_Exception(HTTPStatus.METHOD_NOT_ALLOWED)
 
             info(f'{self.__class__.__name__}: {response_json = }')
             response = self._make_response(response_json)
-        except HTTPException as http_exception:
+        except Error as error:
+            warning(f'{self.__class__.__name__}: {error = }')
+            response = self._make_error_response(error)
+        except HTTP_Exception as http_exception:
             warning(f'{self.__class__.__name__}: {http_exception = }')
-            response = self._make_error_response(http_exception)
+            response = self._make_exception_response(http_exception)
         except Exception:
             exception(f'{self.__class__.__name__}')
-            response = self._make_error_response()
+            response = self._make_exception_response()
         return response
 
     def _get_request(self) -> Request:
@@ -78,9 +83,9 @@ class BaseUrl(ABC):
                 return json.loads(request.data.decode('utf-8'))
             return request.form | request.args
         except UnicodeDecodeError:
-            raise HTTPException(HTTPStatus.BAD_REQUEST, 'The encoding must be UTF-8')
+            raise HTTP_Exception(HTTPStatus.BAD_REQUEST, 'The encoding must be UTF-8')
         except json.JSONDecodeError:
-            raise HTTPException(HTTPStatus.BAD_REQUEST, 'Bad JSON')
+            raise HTTP_Exception(HTTPStatus.BAD_REQUEST, 'Bad JSON')
 
     def _make_response(self, response_json: TypeJson) -> Response:
         """
@@ -89,9 +94,12 @@ class BaseUrl(ABC):
         """
         return self.app.make_response(json.dumps(response_json))
 
-    def _make_error_response(
+    def _make_error_response(self, error: Error) -> Response:
+        return self.app.make_response(error.dict())
+
+    def _make_exception_response(
             self,
-            http_exception: HTTPException = HTTPException()
+            http_exception: HTTP_Exception = HTTP_Exception()
     ) -> Response:
         """
         :param http_exception: the exception that occurred.
@@ -115,28 +123,28 @@ class BaseUrl(ABC):
         :param request_json: current http request in JSON format
         :return: GET method response
         """
-        raise HTTPException(HTTPStatus.METHOD_NOT_ALLOWED)
+        raise HTTP_Exception(HTTPStatus.METHOD_NOT_ALLOWED)
 
     def post(self, request_json: TypeJson) -> TypeJson:
         """
         :param request_json: current http request in JSON format
         :return: POST method response
         """
-        raise HTTPException(HTTPStatus.METHOD_NOT_ALLOWED)
+        raise HTTP_Exception(HTTPStatus.METHOD_NOT_ALLOWED)
 
     def put(self, request_json: TypeJson) -> TypeJson:
         """
         :param request_json: current http request in JSON format
         :return: PUT method response
         """
-        raise HTTPException(HTTPStatus.METHOD_NOT_ALLOWED)
+        raise HTTP_Exception(HTTPStatus.METHOD_NOT_ALLOWED)
 
     def delete(self, request_json: TypeJson) -> TypeJson:
         """
         :param request_json: current http request in JSON format
         :return: DELETE method response
         """
-        raise HTTPException(HTTPStatus.METHOD_NOT_ALLOWED)
+        raise HTTP_Exception(HTTPStatus.METHOD_NOT_ALLOWED)
 
     @staticmethod
     def get_value(
