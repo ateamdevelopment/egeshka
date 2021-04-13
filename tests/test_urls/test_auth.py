@@ -7,7 +7,7 @@ from flask.wrappers import Response
 from src.urls.exceptions import HTTP_Exception, NoParameterException
 from src.urls.auth import CheckEmailUrl
 from tests.conftest import parameterize
-from tests.test_urls.utils import ExceptionResponse, TokenResponse
+from tests.test_urls.utils import ExceptionResponse, TokenResponse, ErrorResponse
 
 
 EMAIL_TOKEN_NAME: Final[str] = CheckEmailUrl.NAME_TOKEN
@@ -36,6 +36,27 @@ EMAIL_TOKEN_LENGTH: Final[int] = CheckEmailUrl.LENGTH_TOKEN
         ))
     ]]
 )
+def test_register_exceptions(test_client, test_data, expect_response):
+    response: Response = test_client.post(
+        '/auth/register',
+        data=test_data
+    )
+    assert expect_response == response
+
+
+@parameterize(
+    ['test_data', 'expect_response'],
+    [[
+        {'email': 'envy15@mail.ru', 'password': 'valid_password'},
+        ErrorResponse(1)
+    ], [
+        {
+            'email': '_'.join(['too_long_email'] * 60) + '@gmail.com',
+            'password': 'valid_password'
+        },
+        ErrorResponse(2)
+    ]]
+)
 def test_register_errors(test_client, test_data, expect_response):
     response: Response = test_client.post(
         '/auth/register',
@@ -49,9 +70,7 @@ email__token: Final[dict[str, str]] = {}
 
 @parameterize(
     ['email', 'password'],
-    [
-        ['serge2015555@gmail.com', 'serge2015555_password']
-    ]
+    [*[['serge2015555@gmail.com', 'serge2015555_password']] * 2]
 )
 def test_register_successful(test_client, email, password):
     response: Response = test_client.post(
