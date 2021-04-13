@@ -4,7 +4,7 @@ import json
 
 from flask.wrappers import Response
 
-from src.urls.exceptions import HTTPException, NoParameterException
+from src.urls.exceptions import HTTP_Exception, NoParameterException
 from src.urls.auth import CheckEmailUrl
 from tests.conftest import parameterize
 from tests.test_urls.utils import ExceptionResponse, TokenResponse
@@ -24,15 +24,15 @@ EMAIL_TOKEN_LENGTH: Final[int] = CheckEmailUrl.LENGTH_TOKEN
         ExceptionResponse(NoParameterException('password'))
     ], [
         {'email': 'not_valid_email@.ru', 'password': 'valid_password'},
-        ExceptionResponse(HTTPException(
+        ExceptionResponse(HTTP_Exception(
             HTTPStatus.BAD_REQUEST,
-            '`email` is not valid'
+            '`email` is invalid'
         ))
     ], [
         {'email': 'valid_email@mail.ru', 'password': 'not_valid_пароль'},
-        ExceptionResponse(HTTPException(
+        ExceptionResponse(HTTP_Exception(
             HTTPStatus.BAD_REQUEST,
-            '`password` is not valid'
+            '`password` is invalid'
         ))
     ]]
 )

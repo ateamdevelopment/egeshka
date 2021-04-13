@@ -4,7 +4,7 @@ import json
 from flask.wrappers import Response
 
 from src.utils.types import TypeJson
-from src.urls.exceptions import HTTPException
+from src.urls.exceptions import HTTP_Exception
 
 
 class TestResponse:
@@ -75,7 +75,7 @@ class ErrorResponse(JsonResponse):
 
 
 class ExceptionResponse(TestResponse):
-    def __init__(self, http_exception: HTTPException):
+    def __init__(self, http_exception: HTTP_Exception):
         TestResponse.__init__(
             self,
             http_exception.http_status,
