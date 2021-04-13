@@ -5,6 +5,7 @@ from logging import debug, warning
 from typing import Final, final
 
 from src.models import User
+from src.urls.exceptions import Error
 from src.urls.base_urls._ip_session_url import IpSessionUrl
 from src.utils.functions import generate_random_token
 from src.utils.types import TypeJson
@@ -62,8 +63,10 @@ class UserSessionUrl(IpSessionUrl, ABC):
         try:
             return cls.__user_sessions[token]
         except KeyError as key_error:
-            debug(f'{cls.__user_sessions = }')
-            warning(f'No user session for this token ({token})')
+            warning(
+                f'No user session for this token ({token})'
+                f'in sessions ({cls.__user_sessions = })'
+            )
             raise key_error
 
     @classmethod
@@ -78,7 +81,7 @@ class UserSessionUrl(IpSessionUrl, ABC):
                 self.__get_session(self.__extract_token(request_json))
             )
         except KeyError:
-            return {'error': 100}
+            raise Error.NO_SESSION
 
     def _get(
             self,
@@ -95,7 +98,7 @@ class UserSessionUrl(IpSessionUrl, ABC):
                 self.__get_session(self.__extract_token(request_json))
             )
         except KeyError:
-            return {'error': 100}
+            raise Error.NO_SESSION
 
     def _post(
             self,
@@ -112,7 +115,7 @@ class UserSessionUrl(IpSessionUrl, ABC):
                 self.__get_session(self.__extract_token(request_json))
             )
         except KeyError:
-            return {'error': 100}
+            raise Error.NO_SESSION
 
     def _put(
             self,
@@ -129,7 +132,7 @@ class UserSessionUrl(IpSessionUrl, ABC):
                 self.__get_session(self.__extract_token(request_json))
             )
         except KeyError:
-            return {'error': 100}
+            raise Error.NO_SESSION
 
     def _delete(
             self,

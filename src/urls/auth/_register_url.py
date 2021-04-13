@@ -7,7 +7,7 @@ from peewee import DoesNotExist
 from src.models import User
 from src.urls.auth._check_email_url import CheckEmailUrl
 from src.urls.base_urls import IpSessionUrl
-from src.urls.exceptions import HTTPException
+from src.urls.exceptions import HTTP_Exception, Error
 from src.utils import email as util_email
 
 __all__ = ['RegisterUrl']
@@ -46,6 +46,9 @@ def _send_code(email: str, code: int) -> None:
 class RegisterUrl(IpSessionUrl):
     url: Final[str] = '/auth/register'
 
+    NonUniqueEmailError: Final[Error] = Error(1)
+    SendEmailError: Final[Error] = Error(2)
+
     def __init__(self, app):
         super().__init__(app)
         self.__last_code: int = 999  # start code == 1000
@@ -62,20 +65,18 @@ class RegisterUrl(IpSessionUrl):
         password = self.get_value(request_json, 'password')
 
         if not _check_email_valid(email):
-            raise HTTPException(HTTPStatus.BAD_REQUEST, '`email` is not valid')
+            raise HTTP_Exception(HTTPStatus.BAD_REQUEST, '`email` is invalid')
         if not _check_password_valid(password):
-            raise HTTPException(HTTPStatus.BAD_REQUEST, '`password` is not valid')
+            raise HTTP_Exception(HTTPStatus.BAD_REQUEST, '`password` is invalid')
 
         if not _check_unique_email(email):
-            return {'error': 1}
+            raise self.NonUniqueEmailError
 
         code = self._code
         try:
             _send_code(email, code)
         except Exception:  # TODO: to clarify
-            return {'error': 2}
+            raise self.SendEmailError
 
         email_token = CheckEmailUrl.add_email(email, password, code)
-        return {
-            'email_token': email_token
-        }
+        return {'email_token': email_token}
