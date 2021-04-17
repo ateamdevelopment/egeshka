@@ -4,7 +4,12 @@ import json
 from flask.wrappers import Response
 
 from src.utils.types import TypeJson
-from src.urls.exceptions import HTTP_Exception
+from src.urls.exceptions import HTTP_Exception, Error
+
+__all__ = [
+    'TestResponse', 'SuccessfulResponse', 'JsonResponse', 'TokenResponse',
+    'ErrorResponse', 'ExceptionResponse'
+]
 
 
 class TestResponse:
@@ -21,8 +26,6 @@ class TestResponse:
     def _eq_data(self, response_data: bytes) -> bool:
         if self.data is None:
             return True
-        print(self.data)
-        print(response_data)
         return self.data == response_data
 
 
@@ -71,7 +74,7 @@ class TokenResponse(JsonResponse):
 
 class ErrorResponse(JsonResponse):
     def __init__(self, error_code: int):
-        JsonResponse.__init__(self, {'error': error_code})
+        JsonResponse.__init__(self, Error(error_code).dict())
 
 
 class ExceptionResponse(TestResponse):

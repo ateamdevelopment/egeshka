@@ -13,7 +13,7 @@ parameterize = mark.parametrize
 order = mark.order
 
 
-@fixture(scope='module')
+@fixture(scope='session')
 def test_client():
     testing_client = app.test_client()
     ctx = app.app_context()
@@ -36,7 +36,7 @@ def temp_text_file(temp_dir):
 
 @fixture(scope='session')
 def _test_image():
-    with open(os.getcwd() + '/tests/test_utils/test_image.jpg', 'rb') as test_image_:
+    with open(os.getcwd() + '/tests/resources/test_image.jpg', 'rb') as test_image_:
         yield test_image_
 
 
@@ -44,3 +44,13 @@ def _test_image():
 def test_image(_test_image):
     _test_image.seek(0)
     return _test_image
+
+
+@fixture(scope='session')
+def test_user(test_client):
+    from tests.test_urls.test_auth import test_register_successful
+
+    test_user_email = 'serge2015555@gmail.com'
+    test_user_password = 'test_password'
+
+    test_register_successful(test_client, test_user_email, test_user_password)

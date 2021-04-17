@@ -9,7 +9,6 @@ from src.urls.auth import CheckEmailUrl
 from tests.conftest import parameterize
 from tests.test_urls.utils import ExceptionResponse, TokenResponse, ErrorResponse
 
-
 EMAIL_TOKEN_NAME: Final[str] = CheckEmailUrl.NAME_TOKEN
 EMAIL_TOKEN_LENGTH: Final[int] = CheckEmailUrl.LENGTH_TOKEN
 
@@ -81,6 +80,14 @@ def test_register_successful(test_client, email, password):
     email__token[email] = json.loads(response.data)[EMAIL_TOKEN_NAME]
 
 
+# TODO: сделать рандомную генерацию кода и проверку на отличие кодов при 2ух запросах
+#   на один email
+def _get_code(email: str) -> int:
+    # noinspection PyProtectedMember
+    # noinspection PyUnresolvedReferences
+    return CheckEmailUrl._CheckEmailUrl__cache_email_sessions[email].code
+
+
 @parameterize(
     'email',
     ['serge2015555@gmail.com']
@@ -89,6 +96,6 @@ def test_check_email(test_client, email):
     token = email__token[email]
     response: Response = test_client.post(
         '/auth/check_email',
-        data={EMAIL_TOKEN_NAME: token, 'code': 1000}
+        data={EMAIL_TOKEN_NAME: token, 'code': _get_code(email)}
     )
     assert response
