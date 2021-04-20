@@ -73,8 +73,11 @@ class TokenResponse(JsonResponse):
 
 
 class ErrorResponse(JsonResponse):
-    def __init__(self, error_code: int):
-        JsonResponse.__init__(self, Error(error_code).dict())
+    def __init__(self, error_code__or__error: Union[int, Error]):
+        if isinstance(error_code__or__error, int):
+            JsonResponse.__init__(self, Error(error_code__or__error).dict())
+        elif isinstance(error_code__or__error, Error):
+            JsonResponse.__init__(self, error_code__or__error.dict())
 
 
 class ExceptionResponse(TestResponse):

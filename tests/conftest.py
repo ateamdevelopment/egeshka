@@ -1,3 +1,4 @@
+from typing import Final
 import os
 
 from testfixtures import TempDirectory
@@ -8,9 +9,9 @@ from src.app import app
 
 __import__('src.main')
 
-mark = pytest.mark
-parameterize = mark.parametrize
-order = mark.order
+mark: Final = pytest.mark
+parameterize: Final = mark.parametrize
+order: Final = mark.order
 
 
 @fixture(scope='session')
@@ -46,11 +47,12 @@ def test_image(_test_image):
     return _test_image
 
 
+TEST_USER_EMAIL: Final[str] = 'serge2015555@gmail.com'
+TEST_USER_PASSWORD: Final[str] = 'serge2015555_password'
+
+
 @fixture(scope='session')
 def test_user(test_client):
-    from tests.test_urls.test_auth import test_register_successful
+    token = test_client.get(
 
-    test_user_email = 'serge2015555@gmail.com'
-    test_user_password = 'test_password'
-
-    test_register_successful(test_client, test_user_email, test_user_password)
+    )
