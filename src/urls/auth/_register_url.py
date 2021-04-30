@@ -63,11 +63,17 @@ class RegisterUrl(IpSessionUrl):
     def post(self, request_json):
         email = self.get_value(request_json, 'email')
         password = self.get_value(request_json, 'password')
+        first_name = self.get_value(request_json, 'first_name')
+        last_name = self.get_value(request_json, 'last_name')
 
         if not _check_email_valid(email):
             raise HTTP_Exception(HTTPStatus.BAD_REQUEST, '`email` is invalid')
         if not _check_password_valid(password):
             raise HTTP_Exception(HTTPStatus.BAD_REQUEST, '`password` is invalid')
+        if not first_name:
+            raise HTTP_Exception(HTTPStatus.BAD_REQUEST, '`first_name` is invalid')
+        if not last_name:
+            raise HTTP_Exception(HTTPStatus.BAD_REQUEST, '`last_name` is invalid')
 
         if not _check_unique_email(email):
             raise self.NonUniqueEmailError
@@ -78,5 +84,7 @@ class RegisterUrl(IpSessionUrl):
         except Exception:  # TODO: to clarify
             raise self.SendEmailError
 
-        email_token = CheckEmailUrl.add_email(email, password, code)
+        email_token = CheckEmailUrl.add_email(
+            email, password, first_name, last_name, code
+        )
         return {'email_token': email_token}

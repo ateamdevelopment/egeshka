@@ -14,10 +14,15 @@ __all__ = ['CheckEmailUrl']
 @final
 class CheckEmailUrl(IpSessionUrl):
     class __EmailSession:
-        def __init__(self, token: str, email: str, password: str, code: int):
+        def __init__(
+                self, token: str, email: str, password: str, first_name: str,
+                last_name: str, code: int
+        ):
             self.token: Final[str] = token
             self.email: Final[str] = email
             self.password: Final[str] = password
+            self.first_name: Final[str] = first_name
+            self.last_name: Final[str] = last_name
             self.code: Final[int] = code
 
     url: Final[str] = '/auth/check_email'
@@ -32,7 +37,9 @@ class CheckEmailUrl(IpSessionUrl):
     __cache_code_sessions: Final[dict[int, __EmailSession]] = {}
 
     @classmethod
-    def add_email(cls, email: str, password: str, code: int) -> str:
+    def add_email(
+            cls, email: str, password: str, first_name: str, last_name: str, code: int
+    ) -> str:
         if (session := cls.__cache_code_sessions.get(code)) is not None:
             if email == session.email:
                 return session.token
@@ -42,7 +49,7 @@ class CheckEmailUrl(IpSessionUrl):
         while token in cls.__email_sessions:
             token = cls.__generate_token()
 
-        session = cls.__EmailSession(token, email, password, code)
+        session = cls.__EmailSession(token, email, password, first_name, last_name, code)
         cls.__email_sessions[token] = session
         cls.__cache_email_sessions[email] = session
         cls.__cache_code_sessions[code] = session
@@ -93,7 +100,12 @@ class CheckEmailUrl(IpSessionUrl):
         except KeyError:
             raise Error.NO_SESSION
         if code == session.code:
-            user = User.create(session.email, session.password)
+            user = User.create(
+                email=session.email,
+                password=session.password,
+                first_name=session.first_name,
+                last_name=session.last_name
+            )
             self.__delete_session(session.email)
             user_token = UserSessionUrl.add_user_session(user)
             return {'user_token': user_token}
