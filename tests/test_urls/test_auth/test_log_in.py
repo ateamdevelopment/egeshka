@@ -1,6 +1,6 @@
 from flask import Response
 
-from tests.conftest import TEST_USER_EMAIL, TEST_USER_PASSWORD
+from tests.conftest import TEST_USER
 from tests.test_urls.test_auth._responses import TokenResponse
 
 
@@ -13,4 +13,4 @@ def log_in(test_client, email, password) -> Response:
 
 def test_log_in(test_client):
     assert TokenResponse(user_token=100) ==\
-           log_in(test_client, TEST_USER_EMAIL, TEST_USER_PASSWORD)
+           log_in(test_client, TEST_USER['email'], TEST_USER['password'])

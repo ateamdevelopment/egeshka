@@ -5,7 +5,7 @@ from pytest import exit
 
 from src.urls.exceptions import InvalidTypeException, Error
 from src.urls.auth import CheckEmailUrl
-from tests.conftest import parameterize, order, TEST_USER_EMAIL
+from tests.conftest import parameterize, order, TEST_USER
 from tests.test_urls.test_auth._responses import (
     ExceptionResponse, TokenResponse, ErrorResponse
 )
@@ -39,11 +39,11 @@ def test_check_email_exception(test_client, test_user_email_token):
     ['token', 'code', 'expected_response'],
     [[
         'invalid_email_token',
-        lambda: get_code(TEST_USER_EMAIL),
+        lambda: get_code(TEST_USER['email']),
         ErrorResponse(Error.NO_SESSION)
     ], [
         None,
-        lambda: get_code(TEST_USER_EMAIL) + 1,  # invalid code
+        lambda: get_code(TEST_USER['email']) + 1,  # invalid code
         ErrorResponse(CheckEmailUrl.MismatchedCodeError)
     ]]
 )
@@ -57,7 +57,8 @@ def test_check_email_error(
 @order(6)
 def test_check_email_successful(test_client, test_user_email_token):
     try:
-        assert TokenResponse(user_token=100) ==\
-               check_email(test_client, test_user_email_token, get_code(TEST_USER_EMAIL))
+        assert TokenResponse(user_token=100) == check_email(
+            test_client, test_user_email_token, get_code(TEST_USER['email'])
+        )
     except AssertionError as assertion_error:
         exit(f'Failed to email confirmation test_user: {assertion_error}')

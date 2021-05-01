@@ -7,7 +7,7 @@ from pytest import exit
 
 from src.urls.exceptions import HTTP_Exception, NoParameterException
 from src.urls.auth import CheckEmailUrl, RegisterUrl
-from tests.conftest import parameterize, order, TEST_USER_EMAIL, TEST_USER_PASSWORD
+from tests.conftest import parameterize, order, TEST_USER
 from tests.test_urls.test_auth._responses import (
     ExceptionResponse, TokenResponse, ErrorResponse
 )
@@ -22,28 +22,70 @@ def register_by_data(test_client, data) -> Response:
     return test_client.post('/auth/register', data=data)
 
 
-def register(test_client, email: str, password: str) -> Response:
-    return register_by_data(test_client, {'email': email, 'password': password})
+def register(
+        test_client, email: str, password: str, first_name: str, last_name: str
+) -> Response:
+    return register_by_data(
+        test_client,
+        {
+            'email': email,
+            'password': password,
+            'first_name': first_name,
+            'last_name': last_name
+        }
+    )
 
 
-def get_email_token(test_client, email: str, password: str) -> str:
-    return json.loads(register(test_client, email, password).data)[_EMAIL_TOKEN_NAME]
+def get_email_token(
+        test_client, email: str, password: str, first_name: str, last_name: str
+) -> str:
+    return json.loads(register(
+        test_client, email, password, first_name, last_name
+    ).data)[_EMAIL_TOKEN_NAME]
+
+
+def _test_user_without_item(item: str):
+    return _copy_dict_without_item(TEST_USER, item)
+
+
+def _copy_dict_without_item(dictionary: dict, item: str):
+    new_dict = dictionary.copy()
+    del new_dict[item]
+    return new_dict
 
 
 @order(1)
 @parameterize(
     ['test_data', 'expected_response'],
     [[
-        b'', ExceptionResponse(NoParameterException('email'))
+        b'',
+        ExceptionResponse(NoParameterException('email'))
     ], [
-        {'email': 'valid_email@mail.ru'},
+        _test_user_without_item('email'),
+        ExceptionResponse(NoParameterException('email'))
+    ], [
+        _test_user_without_item('password'),
         ExceptionResponse(NoParameterException('password'))
     ], [
-        {'email': 'invalid_email@.ru', 'password': 'valid_password'},
+        _test_user_without_item('first_name'),
+        ExceptionResponse(NoParameterException('first_name'))
+    ], [
+        _test_user_without_item('last_name'),
+        ExceptionResponse(NoParameterException('last_name'))
+    ], [
+        TEST_USER | {'email': 'not_valid_email@.ru'},
         ExceptionResponse(HTTP_Exception(HTTPStatus.BAD_REQUEST, '`email` is invalid'))
     ], [
-        {'email': 'valid_email@mail.ru', 'password': 'invalid_пароль'},
+        TEST_USER | {'password': 'not_valid_пароль'},
         ExceptionResponse(HTTP_Exception(HTTPStatus.BAD_REQUEST, '`password` is invalid'))
+    ], [
+        TEST_USER | {'first_name': ''},
+        ExceptionResponse(HTTP_Exception(
+            HTTPStatus.BAD_REQUEST, '`first_name` is invalid'))
+    ], [
+        TEST_USER | {'last_name': ''},
+        ExceptionResponse(HTTP_Exception(
+            HTTPStatus.BAD_REQUEST, '`last_name` is invalid'))
     ]]
 )
 def test_register_exceptions(test_client, test_data, expected_response):
@@ -52,23 +94,30 @@ def test_register_exceptions(test_client, test_data, expected_response):
 
 @order(2)
 @parameterize(
-    ['email', 'password', 'expected_response'],
+    ['email', 'password', 'first_name', 'last_name', 'expected_response'],
     [[
-        'envy15@mail.ru', 'valid_password',
+        {'email': 'envy15@mail.ru', 'password': 'valid_password',
+         'first_name': 'Валидноеимя', 'last_name': 'Валиднаяфамилия'},
         ErrorResponse(RegisterUrl.NonUniqueEmailError)
     ], [
-        '_'.join(['too_long_email'] * 60) + '@gmail.com', 'valid_password',
+        {'email': '_'.join(['too_long_email'] * 60) + '@gmail.com',
+         'password': 'valid_password', 'first_name': 'Валидноеимя',
+         'last_name': 'Валиднаяфамилия'},
         ErrorResponse(RegisterUrl.SendEmailError)
     ]]
 )
-def test_register_errors(test_client, email, password, expected_response):
-    assert expected_response == register(test_client, email, password)
+def test_register_errors(
+        test_client, email, password, first_name, last_name, expected_response
+):
+    assert expected_response == register(
+        test_client, email, password, first_name, last_name
+    )
 
 
 @order(3)
 def test_register_successful(test_client):
     try:
         assert TokenResponse(**{_EMAIL_TOKEN_NAME: _EMAIL_TOKEN_LENGTH}) == \
-               register(test_client, TEST_USER_EMAIL, TEST_USER_PASSWORD)
+               register(test_client, **TEST_USER)
     except AssertionError as assertion_error:
         exit('Failed to register test_user: ', assertion_error)

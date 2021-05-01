@@ -1,5 +1,6 @@
-from typing import Final
+from typing import Final, TypedDict
 import os
+import json
 
 from testfixtures import TempDirectory
 import pytest
@@ -47,12 +48,24 @@ def test_image(_test_image):
     return _test_image
 
 
-TEST_USER_EMAIL: Final[str] = 'serge2015555@gmail.com'
-TEST_USER_PASSWORD: Final[str] = 'serge2015555_password'
+class _Type_TEST_USER(TypedDict):
+    email: str
+    password: str
+    first_name: str
+    last_name: str
+
+
+TEST_USER: Final[_Type_TEST_USER] = {
+    'email': 'serge2015555@gmail.com',
+    'password': 'serge2015555_password',
+    'first_name': 'Имя',
+    'last_name': 'Фамилия'
+}
 
 
 @fixture(scope='session')
 def test_user(test_client):
-    token = test_client.get(
-
-    )
+    from tests.test_urls.test_auth.test_log_in import log_in
+    return json.loads(
+        log_in(test_client, TEST_USER['email'], TEST_USER['password']).data
+    )['user_token']
