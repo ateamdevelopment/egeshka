@@ -96,13 +96,11 @@ def test_register_exceptions(test_client, test_data, expected_response):
 @parameterize(
     ['email', 'password', 'first_name', 'last_name', 'expected_response'],
     [[
-        {'email': 'envy15@mail.ru', 'password': 'valid_password',
-         'first_name': 'Валидноеимя', 'last_name': 'Валиднаяфамилия'},
+        'envy15@mail.ru', 'valid_password', 'Валидноеимя', 'Валиднаяфамилия',
         ErrorResponse(RegisterUrl.NonUniqueEmailError)
     ], [
-        {'email': '_'.join(['too_long_email'] * 60) + '@gmail.com',
-         'password': 'valid_password', 'first_name': 'Валидноеимя',
-         'last_name': 'Валиднаяфамилия'},
+        '_'.join(['too_long_email'] * 60) + '@gmail.com',
+        'valid_password', 'Валидноеимя', 'Валиднаяфамилия',
         ErrorResponse(RegisterUrl.SendEmailError)
     ]]
 )
