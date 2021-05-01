@@ -24,14 +24,15 @@ class AvatarUrl(UserSessionUrl):
                 HTTPStatus.BAD_REQUEST,
                 '`avatar_data` encoding must be base64 (/+)'
             )
+        user = session.user
         try:
-            avatar_url = image_base.save(avatar_data, folder='avatars')
+            avatar_url = image_base.save(avatar_data, folder='avatars', id=user.id)
         except ValueError:
             raise HTTP_Exception(
                 HTTPStatus.BAD_REQUEST,
                 'Invalid `avatar_data`'
             )
-        user = session.user
+
         if old_avatar_url := user.avatar_url:
             image_base.delete(old_avatar_url)
 
@@ -43,6 +44,6 @@ class AvatarUrl(UserSessionUrl):
         user = session.user
         if avatar_url := user.avatar_url:
             image_base.delete(avatar_url)
-        del user.avatar_url
+        user.avatar_url = None
         user.save()
         return {}

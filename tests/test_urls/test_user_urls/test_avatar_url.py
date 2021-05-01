@@ -77,4 +77,6 @@ def test__avatar_url__delete__error(test_client):
 
 def test__avatar_url__delete__successful(test_client, test_user):
     assert avatar__delete(test_client, test_user) == \
-           SuccessfulResponse()
+           SuccessfulResponse(None)
+
+    assert _get_avatar_url(test_client, test_user) is None
