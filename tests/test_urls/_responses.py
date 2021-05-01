@@ -38,7 +38,7 @@ class SuccessfulResponse(TestResponse):
 
 
 class JsonResponse(SuccessfulResponse):
-    def __init__(self, data: Optional[Union[bytes, TypeJson]] = None):
+    def __init__(self, data: Union[bytes, TypeJson] = None):
         if data is None:
             SuccessfulResponse.__init__(self, None)
             json_data = {}

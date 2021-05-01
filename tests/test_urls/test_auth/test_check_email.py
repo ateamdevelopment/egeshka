@@ -6,7 +6,7 @@ from pytest import exit
 from src.urls.exceptions import InvalidTypeException, Error
 from src.urls.auth import CheckEmailUrl
 from tests.conftest import parameterize, order, TEST_USER
-from tests.test_urls.test_auth._responses import (
+from tests.test_urls._responses import (
     ExceptionResponse, TokenResponse, ErrorResponse
 )
 
@@ -28,13 +28,13 @@ def get_code(email: str) -> int:
     return CheckEmailUrl._CheckEmailUrl__cache_email_sessions[email].code
 
 
-@order(4)
+@order(2)
 def test_check_email_exception(test_client, test_user_email_token):
     assert ExceptionResponse(InvalidTypeException(int, 'code')) == \
            check_email(test_client, test_user_email_token, 'str_code')
 
 
-@order(5)
+@order(3)
 @parameterize(
     ['token', 'code', 'expected_response'],
     [[
@@ -54,7 +54,7 @@ def test_check_email_error(
            expected_response
 
 
-@order(6)
+@order(4)
 def test_check_email_successful(test_client, test_user_email_token):
     try:
         assert TokenResponse(user_token=100) == check_email(

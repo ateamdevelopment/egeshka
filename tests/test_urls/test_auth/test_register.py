@@ -8,7 +8,7 @@ from pytest import exit
 from src.urls.exceptions import HTTP_Exception, NoParameterException
 from src.urls.auth import CheckEmailUrl, RegisterUrl
 from tests.conftest import parameterize, order, TEST_USER
-from tests.test_urls.test_auth._responses import (
+from tests.test_urls._responses import (
     ExceptionResponse, TokenResponse, ErrorResponse
 )
 
@@ -18,8 +18,12 @@ _EMAIL_TOKEN_NAME: Final[str] = CheckEmailUrl.NAME_TOKEN
 _EMAIL_TOKEN_LENGTH: Final[int] = CheckEmailUrl.LENGTH_TOKEN
 
 
-def register_by_data(test_client, data) -> Response:
-    return test_client.post('/auth/register', data=data)
+def get_email_token(
+        test_client, email: str, password: str, first_name: str, last_name: str
+) -> str:
+    return json.loads(register(
+        test_client, email, password, first_name, last_name
+    ).data)[_EMAIL_TOKEN_NAME]
 
 
 def register(
@@ -36,12 +40,8 @@ def register(
     )
 
 
-def get_email_token(
-        test_client, email: str, password: str, first_name: str, last_name: str
-) -> str:
-    return json.loads(register(
-        test_client, email, password, first_name, last_name
-    ).data)[_EMAIL_TOKEN_NAME]
+def register_by_data(test_client, data) -> Response:
+    return test_client.post('/auth/register', data=data)
 
 
 def _test_user_without_item(item: str):
@@ -54,7 +54,6 @@ def _copy_dict_without_item(dictionary: dict, item: str):
     return new_dict
 
 
-@order(1)
 @parameterize(
     ['test_data', 'expected_response'],
     [[
@@ -92,7 +91,6 @@ def test_register_exceptions(test_client, test_data, expected_response):
     assert expected_response == register_by_data(test_client, test_data)
 
 
-@order(2)
 @parameterize(
     ['email', 'password', 'first_name', 'last_name', 'expected_response'],
     [[
@@ -112,7 +110,7 @@ def test_register_errors(
     )
 
 
-@order(3)
+@order(1)
 def test_register_successful(test_client):
     try:
         assert TokenResponse(**{_EMAIL_TOKEN_NAME: _EMAIL_TOKEN_LENGTH}) == \

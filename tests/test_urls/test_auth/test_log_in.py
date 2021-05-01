@@ -1,7 +1,7 @@
 from flask import Response
 
 from tests.conftest import TEST_USER
-from tests.test_urls.test_auth._responses import TokenResponse
+from tests.test_urls._responses import TokenResponse
 
 
 def log_in(test_client, email, password) -> Response:
