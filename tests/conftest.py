@@ -64,8 +64,8 @@ TEST_USER: Final[_Type_TEST_USER] = {
 
 
 @fixture(scope='session')
-def test_user(test_client):
-    from tests.test_urls.test_auth.test_log_in import log_in
+def test_user_token(test_client):
+    from tests.test_urls.test_auth.test_log_in import log_in__get
     return json.loads(
-        log_in(test_client, TEST_USER['email'], TEST_USER['password']).data
+        log_in__get(test_client, TEST_USER['email'], TEST_USER['password']).data
     )['user_token']

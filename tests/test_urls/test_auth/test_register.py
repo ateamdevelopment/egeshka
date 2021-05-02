@@ -12,8 +12,6 @@ from tests.test_urls._responses import (
     ExceptionResponse, TokenResponse, ErrorResponse
 )
 
-__all__ = ['get_email_token']
-
 _EMAIL_TOKEN_NAME: Final[str] = CheckEmailUrl.NAME_TOKEN
 _EMAIL_TOKEN_LENGTH: Final[int] = CheckEmailUrl.LENGTH_TOKEN
 
@@ -21,26 +19,23 @@ _EMAIL_TOKEN_LENGTH: Final[int] = CheckEmailUrl.LENGTH_TOKEN
 def get_email_token(
         test_client, email: str, password: str, first_name: str, last_name: str
 ) -> str:
-    return json.loads(register(
+    return json.loads(register__post(
         test_client, email, password, first_name, last_name
     ).data)[_EMAIL_TOKEN_NAME]
 
 
-def register(
+def register__post(
         test_client, email: str, password: str, first_name: str, last_name: str
 ) -> Response:
-    return register_by_data(
-        test_client,
-        {
-            'email': email,
-            'password': password,
-            'first_name': first_name,
-            'last_name': last_name
-        }
-    )
+    return register__post__by_data(test_client, {
+        'email': email,
+        'password': password,
+        'first_name': first_name,
+        'last_name': last_name
+    })
 
 
-def register_by_data(test_client, data) -> Response:
+def register__post__by_data(test_client, data) -> Response:
     return test_client.post('/auth/register', data=data)
 
 
@@ -87,7 +82,7 @@ def _copy_dict_without_item(dictionary: dict, item: str):
             HTTPStatus.BAD_REQUEST, '`last_name` is invalid'))
     ]]
 )
-def test_register_exceptions(test_client, test_data, expected_response):
+def test__register__exceptions(test_client, test_data, expected_response):
     assert expected_response == register_by_data(test_client, test_data)
 
 
@@ -102,18 +97,18 @@ def test_register_exceptions(test_client, test_data, expected_response):
         ErrorResponse(RegisterUrl.SendEmailError)
     ]]
 )
-def test_register_errors(
+def test__register__errors(
         test_client, email, password, first_name, last_name, expected_response
 ):
-    assert expected_response == register(
+    assert expected_response == register__post(
         test_client, email, password, first_name, last_name
     )
 
 
 @order(1)
-def test_register_successful(test_client):
+def test__register__successful(test_client):
     try:
         assert TokenResponse(**{_EMAIL_TOKEN_NAME: _EMAIL_TOKEN_LENGTH}) == \
-               register(test_client, **TEST_USER)
+               register__post(test_client, **TEST_USER)
     except AssertionError as assertion_error:
-        exit('Failed to register test_user: ', assertion_error)
+        exit('Failed to register test_user: ' + str(assertion_error))

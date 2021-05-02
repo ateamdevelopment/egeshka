@@ -13,7 +13,7 @@ from flask.wrappers import Response
 
 
 def avatar__put(test_client, user_token: str, avatar_data: bytes) -> Response:
-    return avatar__put_by_data(
+    return avatar__put__by_data(
         test_client,
         {
             'user_token': user_token,
@@ -22,15 +22,15 @@ def avatar__put(test_client, user_token: str, avatar_data: bytes) -> Response:
     )
 
 
-def avatar__put_by_data(test_client, data) -> Response:
+def avatar__put__by_data(test_client, data) -> Response:
     return test_client.put('/user/avatar', data=data)
 
 
 def avatar__delete(test_client, user_token: str) -> Response:
-    return avatar__delete_by_data(test_client, data={'user_token': user_token})
+    return avatar__delete__by_data(test_client, data={'user_token': user_token})
 
 
-def avatar__delete_by_data(test_client, data) -> Response:
+def avatar__delete__by_data(test_client, data) -> Response:
     return test_client.delete('/user/avatar', data=data)
 
 
@@ -55,9 +55,11 @@ def _get_avatar_url(test_client, user_token) -> str:
         ExceptionResponse(HTTP_Exception(HTTPStatus.BAD_REQUEST, 'Invalid `avatar_data`'))
     ]]
 )
-def test__avatar_url__put__exception(test_client, test_user, data, expected_response):
-    assert avatar__put_by_data(test_client, data=data | {'user_token': test_user}) == \
-           expected_response
+def test__avatar_url__put__exception(
+        test_client, test_user_token, data, expected_response):
+    assert avatar__put__by_data(
+        test_client, data=data | {'user_token': test_user_token}
+    ) == expected_response
 
 
 def test__avatar_url__put__error(test_client, test_image):
@@ -65,9 +67,9 @@ def test__avatar_url__put__error(test_client, test_image):
            ErrorResponse(Error.NO_SESSION)
 
 
-def test__avatar_url__put__successful(test_client, test_user, test_image):
-    assert avatar__put(test_client, test_user, test_image.read()) == \
-           JsonResponse({'avatar_url': _get_avatar_url(test_client, test_user)})
+def test__avatar_url__put__successful(test_client, test_user_token, test_image):
+    assert avatar__put(test_client, test_user_token, test_image.read()) == \
+           JsonResponse({'avatar_url': _get_avatar_url(test_client, test_user_token)})
 
 
 def test__avatar_url__delete__error(test_client):
@@ -75,8 +77,8 @@ def test__avatar_url__delete__error(test_client):
            ErrorResponse(Error.NO_SESSION)
 
 
-def test__avatar_url__delete__successful(test_client, test_user):
-    assert avatar__delete(test_client, test_user) == \
+def test__avatar_url__delete__successful(test_client, test_user_token):
+    assert avatar__delete(test_client, test_user_token) == \
            SuccessfulResponse(None)
 
-    assert _get_avatar_url(test_client, test_user) is None
+    assert _get_avatar_url(test_client, test_user_token) is None

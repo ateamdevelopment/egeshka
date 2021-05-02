@@ -13,7 +13,7 @@ from tests.test_urls._responses import (
 _EMAIL_TOKEN_NAME: Final[str] = CheckEmailUrl.NAME_TOKEN
 
 
-def check_email(test_client, email_token, code) -> Response:
+def check_email__post(test_client, email_token, code) -> Response:
     return test_client.post(
         '/auth/check_email',
         data={_EMAIL_TOKEN_NAME: email_token, 'code': code}
@@ -22,16 +22,16 @@ def check_email(test_client, email_token, code) -> Response:
 
 # TODO: сделать рандомную генерацию кода и проверку на отличие кодов при 2ух запросах
 #   на один email
-def get_code(email: str) -> int:
+def get_email_code(email: str) -> int:
     # noinspection PyProtectedMember
     # noinspection PyUnresolvedReferences
     return CheckEmailUrl._CheckEmailUrl__cache_email_sessions[email].code
 
 
 @order(2)
-def test_check_email_exception(test_client, test_user_email_token):
+def test__check_email_url__exception(test_client, test_user_email_token):
     assert ExceptionResponse(InvalidTypeException(int, 'code')) == \
-           check_email(test_client, test_user_email_token, 'str_code')
+           check_email__post(test_client, test_user_email_token, 'str_code')
 
 
 @order(3)
@@ -39,26 +39,26 @@ def test_check_email_exception(test_client, test_user_email_token):
     ['token', 'code', 'expected_response'],
     [[
         'invalid_email_token',
-        lambda: get_code(TEST_USER['email']),
+        lambda: get_email_code(TEST_USER['email']),
         ErrorResponse(Error.NO_SESSION)
     ], [
         None,
-        lambda: get_code(TEST_USER['email']) + 1,  # invalid code
+        lambda: get_email_code(TEST_USER['email']) + 1,  # invalid code
         ErrorResponse(CheckEmailUrl.MismatchedCodeError)
     ]]
 )
-def test_check_email_error(
+def test__check_email_url__error(
         test_client, token, code, expected_response, test_user_email_token
 ):
-    assert check_email(test_client, token or test_user_email_token, code()) ==\
+    assert check_email__post(test_client, token or test_user_email_token, code()) == \
            expected_response
 
 
 @order(4)
-def test_check_email_successful(test_client, test_user_email_token):
+def test__check_email_url__successful(test_client, test_user_email_token):
     try:
-        assert TokenResponse(user_token=100) == check_email(
-            test_client, test_user_email_token, get_code(TEST_USER['email'])
+        assert TokenResponse(user_token=100) == check_email__post(
+            test_client, test_user_email_token, get_email_code(TEST_USER['email'])
         )
     except AssertionError as assertion_error:
         exit(f'Failed to email confirmation test_user: {assertion_error}')

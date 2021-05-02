@@ -6,7 +6,7 @@ from tests.conftest import order, TEST_USER
 from tests.test_urls._responses import (
     SuccessfulResponse, ExceptionResponse, ErrorResponse, JsonResponse
 )
-from tests.test_urls.test_auth.test_log_in import log_in
+from tests.test_urls.test_auth.test_log_in import log_in__get
 
 
 def user__get(test_client, data) -> Response:
@@ -28,9 +28,9 @@ def test__user_url__get__error(test_client):
 
 
 @order(5)
-def test__user_url__get__successful(test_client, test_user):
+def test__user_url__get__successful(test_client, test_user_token):
     # noinspection PyTypeChecker
-    assert user__get(test_client, {'user_token': test_user}) == \
+    assert user__get(test_client, {'user_token': test_user_token}) == \
            JsonResponse(TEST_USER | {'id': 2, 'avatar_url': None})
 
 
@@ -45,10 +45,10 @@ def test__user_url__delete__error(test_client):
 
 
 @order(-1)
-def test__user_url__delete__successful(test_client, test_user):
+def test__user_url__delete__successful(test_client, test_user_token):
     # noinspection PyTypeChecker
-    assert user__delete(test_client, {'user_token': test_user}) == \
+    assert user__delete(test_client, {'user_token': test_user_token}) == \
            SuccessfulResponse(None)
 
-    assert log_in(test_client, TEST_USER['email'], TEST_USER['password']) ==\
+    assert log_in__get(test_client, TEST_USER['email'], TEST_USER['password']) == \
            ErrorResponse(LogInUrl.NotExistsUserError)
