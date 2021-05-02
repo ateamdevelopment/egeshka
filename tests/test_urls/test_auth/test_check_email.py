@@ -30,8 +30,8 @@ def get_email_code(email: str) -> int:
 
 @order(2)
 def test__check_email_url__exception(test_client, test_user_email_token):
-    assert ExceptionResponse(InvalidTypeException(int, 'code')) == \
-           check_email__post(test_client, test_user_email_token, 'str_code')
+    assert check_email__post(test_client, test_user_email_token, 'str_code') == \
+           ExceptionResponse(InvalidTypeException(int, 'code'))
 
 
 @order(3)
@@ -57,8 +57,8 @@ def test__check_email_url__error(
 @order(4)
 def test__check_email_url__successful(test_client, test_user_email_token):
     try:
-        assert TokenResponse(user_token=100) == check_email__post(
+        assert check_email__post(
             test_client, test_user_email_token, get_email_code(TEST_USER['email'])
-        )
+        ) == TokenResponse(user_token=100)
     except AssertionError as assertion_error:
         exit(f'Failed to email confirmation test_user: {assertion_error}')

@@ -27,7 +27,7 @@ def test__user_url__get__error(test_client):
            ErrorResponse(Error.NO_SESSION)
 
 
-@order(5)
+@order(6)
 def test__user_url__get__successful(test_client, test_user_token):
     # noinspection PyTypeChecker
     assert user__get(test_client, {'user_token': test_user_token}) == \

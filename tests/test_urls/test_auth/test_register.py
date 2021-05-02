@@ -83,7 +83,7 @@ def _copy_dict_without_item(dictionary: dict, item: str):
     ]]
 )
 def test__register__exceptions(test_client, test_data, expected_response):
-    assert expected_response == register_by_data(test_client, test_data)
+    assert expected_response == register__post__by_data(test_client, test_data)
 
 
 @parameterize(
