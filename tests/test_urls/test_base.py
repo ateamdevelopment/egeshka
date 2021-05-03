@@ -14,7 +14,7 @@ def echo__get__by_data(test_client, data) -> Response:
 @parameterize(
     ['data', 'expected_response'],
     [[
-        '{"bad": "encoding"}'.encode('ISO-8859-1'),
+        '{"bad": "encoding"}'.encode('utf-16'),
         ExceptionResponse(HTTP_Exception(
             HTTPStatus.BAD_REQUEST, 'The encoding must be UTF-8'))
     ], [
